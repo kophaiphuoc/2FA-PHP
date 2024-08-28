@@ -1,0 +1,25 @@
+{
+  "$schema": "https://wails.io/schemas/config.v2.json",
+  "name": "2FA-PHP",
+  "outputfilename": "2FA-PHP",
+  "frontend:install": "yarn install",
+  "frontend:build": "yarn run build",
+  "frontend:dev:watcher": "yarn run dev",
+  "frontend:dev:serverUrl": "auto",
+  "author": {
+    "name": "kophaiphuoc",
+    "email": "92625436+kophaiphuoc@users.noreply.github.com"
+  },
+  "windows": {
+    "width": 300,
+    "height": 500
+  },
+  "macos": {
+    "width": 300,
+    "height": 500
+  },
+  "linux": {
+    "width": 300,
+    "height": 500
+  }
+}
