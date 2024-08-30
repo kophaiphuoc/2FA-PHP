@@ -7,6 +7,7 @@ toolchain go1.22.5
 require (
 	github.com/kbinani/screenshot v0.0.0-20240820160931-a8a2c5d0e191
 	github.com/makiuchi-d/gozxing v0.1.1
+	github.com/mattn/go-sqlite3 v1.14.22
 	github.com/pquerna/otp v1.4.0
 	github.com/wailsapp/wails/v2 v2.9.1
 )

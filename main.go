@@ -2,7 +2,9 @@ package main
 
 import (
 	app2 "2FA-PHP/app"
+	"context"
 	"embed"
+	"fmt"
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
@@ -13,13 +15,24 @@ import (
 var assets embed.FS
 
 func main() {
+	// Initialize database
+	db, err := app2.NewDatabase("two_fa.db")
+	if err != nil {
+		fmt.Println("Error opening database:", err)
+	} else {
+		defer db.Close()
+	}
+
+	// Create a new context
+	ctx := context.Background()
 	// Create an instance of the app structure
-	app := app2.NewApp()
+	app := app2.NewApp(ctx, db)
 	// Create application with options
-	err := wails.Run(&options.App{
-		Title:  "camera-go",
-		Width:  300,
-		Height: 500,
+	err = wails.Run(&options.App{
+		Title:         "2FA-PHP",
+		Width:         332,
+		Height:        555,
+		DisableResize: true,
 		AssetServer: &assetserver.Options{
 			Assets: assets,
 		},
@@ -38,7 +51,6 @@ func main() {
 				UseToolbar:                 true,
 				HideToolbarSeparator:       true,
 			},
-			Appearance:           mac.NSAppearanceNameDarkAqua,
 			WebviewIsTransparent: true,
 			WindowIsTranslucent:  false,
 			About: &mac.AboutInfo{

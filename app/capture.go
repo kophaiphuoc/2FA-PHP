@@ -13,19 +13,19 @@ type Window struct {
 	W, H int
 }
 
-// CaptureScreen captures the screen and scans for QR codes
+// CaptureScreen captures the screen
 func CaptureScreen(window Window) (string, error) {
 
-	// Tạo một hình chữ nhật với vị trí và kích thước đã xác định
+	// create rect
 	rect := image.Rect(window.X, window.Y, window.X+window.W, window.Y+window.H)
 
-	// Chụp màn hình trong khu vực đã xác định
+	// capture rect
 	img, err := screenshot.CaptureRect(rect)
 	if err != nil {
 		return "", fmt.Errorf("lỗi khi chụp màn hình: %v", err)
 	}
 
-	// Lưu hình ảnh đã chụp vào file
+	// save image to file
 	file, err := os.Create("screenshot.png")
 	if err != nil {
 		return "", fmt.Errorf("lỗi khi tạo file: %v", err)
@@ -41,7 +41,7 @@ func CaptureScreen(window Window) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("lỗi khi lưu ảnh: %v", err)
 	}
-	// Ghi log rằng hình ảnh đã được lưu
+	// log file save
 	fmt.Println("Screenshot saved to screenshot.png")
 
 	return "screenshot", nil

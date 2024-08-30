@@ -4,44 +4,36 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
-	"encoding/hex"
 	"fmt"
 	"io"
 )
 
-func Encrypt(text, key string) (string, error) {
-	block, err := aes.NewCipher([]byte(key))
+func Encrypt(key, plaintext []byte) ([]byte, error) {
+	block, err := aes.NewCipher(key)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	plaintext := []byte(text)
 	ciphertext := make([]byte, aes.BlockSize+len(plaintext))
 	iv := ciphertext[:aes.BlockSize]
-
 	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
-		return "", err
+		return nil, err
 	}
 
 	stream := cipher.NewCFBEncrypter(block, iv)
 	stream.XORKeyStream(ciphertext[aes.BlockSize:], plaintext)
 
-	return hex.EncodeToString(ciphertext), nil
+	return ciphertext, nil
 }
 
-func Decrypt(encryptedText, key string) (string, error) {
-	ciphertext, err := hex.DecodeString(encryptedText)
+func Decrypt(key, ciphertext []byte) ([]byte, error) {
+	block, err := aes.NewCipher(key)
 	if err != nil {
-		return "", err
-	}
-
-	block, err := aes.NewCipher([]byte(key))
-	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	if len(ciphertext) < aes.BlockSize {
-		return "", fmt.Errorf("ciphertext too short")
+		return nil, fmt.Errorf("ciphertext too short")
 	}
 
 	iv := ciphertext[:aes.BlockSize]
@@ -50,5 +42,5 @@ func Decrypt(encryptedText, key string) (string, error) {
 	stream := cipher.NewCFBDecrypter(block, iv)
 	stream.XORKeyStream(ciphertext, ciphertext)
 
-	return string(ciphertext), nil
+	return ciphertext, nil
 }

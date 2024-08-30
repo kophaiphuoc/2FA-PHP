@@ -1,54 +1,56 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React from 'react';
 import '../styles/QRCodeScanner.css';
-import {CaptureScreenAndScanQR, HandlerSecret} from "../../wailsjs/go/app/App";
+import Cancel from '../assets/images/cancel.png';
+import { useNavigate } from 'react-router-dom';
+import { CaptureScreenAndScanQR, GetOTPAndTimeExp,AddTwoFA } from "../../wailsjs/go/app/App";
+import { toast } from "react-toastify";
 
-const QRCodeScanner: React.FC = () => {
-    const [dragging, setDragging] = useState<boolean>(false);
-    const [position, setPosition] = useState({ x: 0, y: 0 });
-    const containerRef = useRef<HTMLDivElement>(null);
+interface OTPAndTimeExp {
+    Otp: string;
+    TimeExp: number;
+    Secret: string;
+}
 
-    useEffect(() => {
-        const handleMouseMove = (event: MouseEvent) => {
-            if (dragging && containerRef.current) {
-                setPosition({
-                    x: event.clientX - containerRef.current.offsetWidth / 2,
-                    y: event.clientY - containerRef.current.offsetHeight / 2,
-                });
+const QRCodeScanner = () => {
+    const navigate = useNavigate();
+
+    const handleGoBack = () => {
+        navigate(-1);
+    };
+
+    const scanSucess = (id:number) => {
+        navigate('/form2fa', { state: { id }})
+    }
+
+    const handlerQrCode = async () => {
+        try {
+            const code = await CaptureScreenAndScanQR();
+
+            const result: OTPAndTimeExp = await GetOTPAndTimeExp(code) as OTPAndTimeExp;
+
+            if (result.TimeExp === 0) {
+                toast.error("Not support");
+            } else {
+                const id = await AddTwoFA(1, "", "", result.Secret,"")
+                scanSucess(id)
             }
-        };
-
-        const handleMouseUp = () => {
-            setDragging(false);
-        };
-
-        window.addEventListener('mousemove', handleMouseMove);
-        window.addEventListener('mouseup', handleMouseUp);
-
-        return () => {
-            window.removeEventListener('mousemove', handleMouseMove);
-            window.removeEventListener('mouseup', handleMouseUp);
-        };
-    }, [dragging]);
-
-    const handleMouseDown = () => {
-        setDragging(true);
+        } catch (error) {
+            toast.error(error+"");
+        }
     };
 
     return (
-        // <div
-        //     ref={containerRef}
-        //     className="qr-scanner-container"
-        //     style={{ left: `${position.x}px`, top: `${position.y}px` }}
-        //     onMouseDown={handleMouseDown}
-        // >
-        // </div>
-        <>
-            <div className="qr-scanner-container">
-                <div style={{width: 50, height: 50, border: 1, borderStyle: "solid", borderRadius: 50, marginTop: 400}}
-                     onClick={HandlerSecret}/>
+        <div className="qr-scanner">
+            <div className="scan-area">
+                <div className="scan-frame">
+                    <div className="scan-line"></div>
+                    <img onClick={handleGoBack} src={Cancel} style={{ width: 20, height: 20, position: 'absolute', right: 10, top: 10 }} />
+                </div>
             </div>
-
-        </>
+            <div onClick={handlerQrCode} style={{ flex: 1, alignItems: 'center', justifyContent: "center", display: 'flex' }}>
+                <div style={{ width: 50, height: 50, borderWidth: 3, borderStyle: "solid", borderRadius: 30, borderColor: "green" }} />
+            </div>
+        </div>
     );
 };
 
