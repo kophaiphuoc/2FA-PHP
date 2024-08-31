@@ -3,7 +3,6 @@ import CardOtp from './CardOtp';
 import Add from "../assets/images/add.png";
 import { useNavigate } from 'react-router-dom';
 import { GetTwoFAs } from "../../wailsjs/go/app/App";
-import {toast} from "react-toastify";
 
 function Home() {
     const navigate = useNavigate();
@@ -17,23 +16,29 @@ function Home() {
         const fetchList2FA = async () => {
             try {
                 const data = await GetTwoFAs();
-                setList2FA(data);
+                // Kiểm tra nếu dữ liệu hợp lệ
+                if (data && Array.isArray(data)) {
+                    setList2FA(data);
+                } else {
+                    // Nếu dữ liệu không hợp lệ, có thể log lỗi hoặc thông báo
+                    console.error('Invalid data received:', data);
+                    // toast.error('Dữ liệu không hợp lệ');
+                }
             } catch (error) {
-                console.log(error)
-                toast.error(error+"")
+                // Log lỗi và thông báo cho người dùng
+                console.error('Fetch error:', error);
+                // toast.error('Lỗi khi lấy dữ liệu');
             }
         };
-        fetchList2FA();
-    }, []);
 
-    const test =async () =>{
-        try {
-            const res = await GetTwoFAs
-            toast.error(res+"")
-        }catch (e) {
-            toast.error(e+"")
-        }
-    }
+        // Sử dụng setTimeout để gọi fetchList2FA sau 5 giây
+        const timeoutId = setTimeout(() => {
+            fetchList2FA();
+        }, 5000); // 5000 ms = 5 giây
+
+        // Clean up hàm khi component bị unmount
+        return () => clearTimeout(timeoutId);
+    }, []); // Chạy effect này chỉ một lần khi component mount
 
     return (
         <div style={{ width: 332, height: 550, display: 'flex', flexDirection: 'column' }}>

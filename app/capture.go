@@ -6,43 +6,52 @@ import (
 	"image"
 	"image/png"
 	"os"
+	"path/filepath"
 )
 
+// Window defines the region for capturing the screen
 type Window struct {
 	X, Y int
 	W, H int
 }
 
-// CaptureScreen captures the screen
+// CaptureScreen captures a portion of the screen as specified by the Window struct
+// and saves it to a file, returning the file path.
 func CaptureScreen(window Window) (string, error) {
 
-	// create rect
+	// Create a rectangle for the capture region
 	rect := image.Rect(window.X, window.Y, window.X+window.W, window.Y+window.H)
 
-	// capture rect
+	// Capture the specified region
 	img, err := screenshot.CaptureRect(rect)
 	if err != nil {
-		return "", fmt.Errorf("lỗi khi chụp màn hình: %v", err)
+		return "", fmt.Errorf("error capturing screen: %v", err)
 	}
 
-	// save image to file
-	file, err := os.Create("screenshot.png")
+	// Generate the file path in the user's home directory
+	fileName := "screenshot.png"
+	filePath := filepath.Join(os.Getenv("HOME"), fileName)
+
+	// Create the file to save the screenshot
+	file, err := os.Create(filePath)
 	if err != nil {
-		return "", fmt.Errorf("lỗi khi tạo file: %v", err)
+		return "", fmt.Errorf("error creating file: %v", err)
 	}
-	defer func(file *os.File) {
-		err := file.Close()
-		if err != nil {
-
+	defer func() {
+		if closeErr := file.Close(); closeErr != nil {
+			fmt.Printf("Error closing file: %v\n", closeErr)
 		}
-	}(file)
+	}()
 
+	// Encode the captured image to PNG format and save it
 	err = png.Encode(file, img)
 	if err != nil {
-		return "", fmt.Errorf("lỗi khi lưu ảnh: %v", err)
+		return "", fmt.Errorf("error saving image: %v", err)
 	}
-	// log file save
-	fmt.Println("Screenshot saved to screenshot.png")
 
-	return "screenshot", nil
+	// Log the file path to confirm the save
+	fmt.Printf("Screenshot saved to %s\n", filePath)
+
+	// Return the file path
+	return filePath, nil
 }

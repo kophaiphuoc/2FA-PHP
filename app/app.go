@@ -76,13 +76,19 @@ func (a *App) CaptureScreenAndScanQR() (string, error) {
 		H: height,
 	}
 
-	_, err := CaptureScreen(window)
-
-	result, err := DecodeQRCodeFromImage("screenshot.png")
+	// Gọi hàm CaptureScreen để chụp màn hình và nhận về đường dẫn tệp ảnh
+	filePath, err := CaptureScreen(window)
 	if err != nil {
-		return "", err
+		return "", err // Xử lý lỗi nếu chụp màn hình không thành công
 	}
-	// return result
+
+	// Gọi hàm DecodeQRCodeFromImage với đường dẫn ảnh được trả về từ CaptureScreen
+	result, err := DecodeQRCodeFromImage(filePath)
+	if err != nil {
+		return "", err // Xử lý lỗi nếu giải mã QR code thất bại
+	}
+
+	// Trả về kết quả đã giải mã
 	return result, nil
 }
 
